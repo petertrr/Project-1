@@ -1,115 +1,210 @@
 #include<iostream>
-#include<cstdlib>
 
 #include"set.h"
 
 inline int min(int a, int b) {return a<b ? a : b ;}
-inline int random(int min, int max) {return min + rand()%(max - min);}
 
-Set::Set(int size)
+Set::Set()
 { 
-	size_ = size; 
-	data_ = new int[size_]; 
-	for(int i = 0; i < size_; ++i)
-		data_[i] = random(0, 5);
+	size_ = 0; 
+	cur_ = nullptr;
+	next_ = nullptr;
 	std::cout<<"Constructor\n";
 }
 
 Set::Set(const Set &set)
 {
-	if(size_>0) delete data_;
-	size_ = set.size();
-	data_ = new int[size_];
-	for(int i = 0; i < size_; ++i)
-		data_[i] = set.data_[i];
+	size_ = 0;
+	cur_ = nullptr;
+	next_ = nullptr;
+	List *ptr = set.cur_;
+	while (ptr != nullptr)
+		{
+			add(ptr->data);
+			ptr = ptr->prev;
+		}
 	std::cout<<"Copy constructor\n";
 }
 
 Set& Set::operator=(const Set &set)
 {
 	if(this == &set) return *this;
-	if(size_>0)delete data_;
+
+	for (List* ptr = cur_; ;)
+	{
+		if (ptr != nullptr) delete ptr->next;
+		ptr = ptr->prev;
+		if (ptr == nullptr) { delete ptr; break; }
+	}
+
+	size_ = 0;
+	cur_ = nullptr;
+	next_ = nullptr;
+
+	for (List* ptr = set.cur_; ptr != nullptr;)
+	{
+		add(ptr->data);
+		ptr = ptr->prev;
+	}
+
+	/*
+	int a = min(size_, set.size());
 	size_ = set.size();
-	data_ = new int[size_];
-	for(int i = 0; i < size_; ++i)
-		data_[i] = set.data_[i];
-	std::cout<<"Assignment\n";
+	List* ptrThis = cur_; List *ptr = set.cur_;
+	for (int i = 1; i < a; ++i)
+	{
+		ptrThis->data = ptr->data;
+		ptrThis = ptrThis->prev;
+		ptr = ptr->prev;
+	}
+	if (set.size() > size_)
+		while (ptr != nullptr)
+		{
+			add(ptr->data);
+			ptr = ptr->prev;
+		}
+	*/
 	return *this;
+}
+
+Set::~Set()
+{
+	for (List* ptr = cur_; ;)
+	{
+		if (ptr != nullptr) delete ptr->next;
+		ptr = ptr->prev;
+		if (ptr == nullptr) { delete ptr; break; }
+	}
+}
+
+void Set::add(int a)
+{
+	if (cur_ == nullptr) // есть ли значения слева?
+	{
+		++size_;
+		cur_ = new List;
+		cur_->data = a;
+		cur_->next = nullptr;
+		cur_->prev = nullptr;
+		return;
+	}
+	if (contains(a)) return;
+	++size_;
+	next_ = new List;
+	next_->data = a;
+	next_->next = nullptr;
+	next_->prev = cur_;
+	cur_->next = next_;
+	cur_ = next_;
+	return;
+	/*
+	if (cur_ == nullptr) // есть ли значения слева?
+	{
+		cur_ = new List;
+		cur_->data = a;
+		cur_->next = nullptr;
+		cur_->prev = nullptr;
+		return;
+	}
+	else for (List* ptr = cur_; ;)
+	{
+		if (ptr == nullptr) return;
+		else if(cur_->data < a) 
+		{
+			next_ = new List;
+			next_->data = a;
+			next_->next = nullptr;
+			next_->prev = cur_;
+			cur_->next = next_;
+			cur_ = next_;
+			return;
+		}
+		else if (cur_->data > a && cur_->prev->data < a)
+		{
+			next_ = new List;
+			next_->data = a;
+			next_->next = cur_;
+			next_->prev = cur_->prev;
+			cur_->prev->next = next_;
+			cur_->prev = next_;
+			cur_ = next_;
+			return;
+		}
+		else if (cur_->data > a && cur_->prev->data > a) ptr = ptr->prev;
+		else if (cur_->data == a) return;
+	}
+	*/
+}
+
+void Set::remove(int a)
+{
+	for (List* ptr = cur_; ptr != nullptr;)
+	{
+		if (ptr->data == a)
+		{
+			if (ptr->next == nullptr) //значение стоит с края
+			{
+				ptr->prev->next = nullptr;
+			}
+			else if(ptr->prev == nullptr) // с другого края 
+			{
+				ptr->next->prev = nullptr;
+			}
+			else
+			{
+				ptr->next->prev = ptr->prev;
+				ptr->prev->next = ptr->next;
+			}
+			delete ptr;
+			--size_;
+			return;
+		}
+		else ptr = ptr->prev;
+	}
+	return;
+}
+
+bool Set::contains(int a)
+{
+	for (List* ptr = cur_; ptr != nullptr;)
+	{
+		if (ptr->data == a) return true;
+		else ptr = ptr->prev;
+	}
+	return false;
 }
 
 Set Set::unite(Set &set1, Set &set2)
 {
-	Set result( set1.size() + set2.size() );
-	for(int i = 0; i < set1.size(); ++i)
+	Set result = set1;
+	for (List* ptr = set2.cur_; ptr != nullptr;)
 	{
-		result.data_[i] = set1.data_[i];
-	}
-	for(int i = set1.size(); i < result.size(); ++i)
-	{
-		result.data_[i] = set2.data_[i - set1.size()];
+		result.add(ptr->data);
+		ptr = ptr->prev;
 	}
 	return result;
 }
 
 Set Set::intersect(Set &set1, Set &set2)
 {
-	int size = 0;
-	int *indeces1 = new int[ min(set1.size(), set2.size()) ];
-	int *indeces2 = new int[ min(set1.size(), set2.size()) ];
-	for(int i = 0; i < set2.size(); ++i)
-		for(int j = 0; j < set1.size(); ++j)
-		{
-			for(int k = 0; k < size; ++k)
-			{
-				if(j == indeces1[k]) ++j;
-				else if(i == indeces2[k]) ++i;
-			}
-			if(set1.data_[j] == set2.data_[i])
-			{
-				indeces1[size] = j;
-				indeces2[size] = i;
-				++size;
-				++i;  j=0;
-			}
-		}
-	Set result(size);
-	for(int i = 0; i < size; ++i)
-		result.data_[i] = set1.data_[indeces1[i]];
-
+	Set result;
+	for (List* ptr = set2.cur_; ptr != nullptr;)
+	{
+		if (set1.contains(ptr->data)) result.add(ptr->data);
+		ptr = ptr->prev;
+	}
 	return result;
 }
 
 Set Set::subtract(Set &set1, Set &set2)
 {
-	int size = 0;
-	int *indeces1 = new int[ set1.size()];
-	int *indeces2 = new int[ set1.size()];
-	for(int i = 0; i < set2.size(); ++i)
-		for(int j = 0; j < set1.size(); ++j)
-		{
-			for(int k = 0; k < size; ++k)
-			{
-				if(j == indeces1[k]) ++j;
-				else if(i == indeces2[k]) ++i;
-			}
-			if(set1.data_[j] == set2.data_[i])
-			{
-				indeces1[size] = j;
-				indeces2[size] = i;
-				++size;
-				++i; j = -1; // потому что выполнится ++j и сделает 0
-			}
-		}
-	Set result(set1.size() - size);
-	for(int i = 0; i < result.size(); ++i)
+	Set result = set1;
+	for (List* ptr = set2.cur_; ptr != nullptr;)
 	{
-		static int j = 0;
-		for(int k = 0; k < size; ++k)
-			if(j == indeces1[k]) {++j; k = 0;}
-		result.data_[i] = set1.data_[j];
-		++j;
+		if (set1.contains(ptr->data)) 
+			result.remove(ptr->data);
+		ptr = ptr->prev;
 	}
-
 	return result;
 }
 
@@ -117,10 +212,11 @@ std::ostream& operator<<(std::ostream& os, const Set& set)
 {
 	if(set.size() == 0) {os<<"{O}"; return os;}
 	os<<"{ ";
-	for(int i = 0; i < set.size(); ++i)
+	for(List* ptr = set.cur_; ptr != nullptr;)
 	{
-		 os<<set.data_[i];
-		if(i < set.size()-1) os<<", ";
+		os << ptr->data;
+		ptr = ptr->prev;
+		if( ptr != nullptr) os<<", ";
 		else os<<" }";
 	}
 	return os;

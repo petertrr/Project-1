@@ -1,14 +1,28 @@
 #pragma once
 
+class Set;
+struct List;
+
+struct List
+{
+	int data;
+	List *prev;
+	List *next;
+};
+
 class Set
 {
 public:
-	Set(int size = 0);
+	Set();
 	Set(const Set &set);
 	//Set(Set &&set);
 	Set &operator=(const Set &set);
-	~Set() { delete data_; };
+	~Set();
 
+	void add(int a);
+	void remove(int a);
+	bool contains(int a);
+	
 	Set unite(Set &set1, Set &set2);
 	Set intersect(Set &set1, Set &set2);
 	Set subtract(Set &set1, Set &set2);
@@ -23,5 +37,6 @@ public:
 
 private:
 	int size_;
-	int* data_;
+	List *next_;
+	List* cur_;
 };
