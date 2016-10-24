@@ -5,10 +5,7 @@
 
 inline int min(int a, int b) {return a<b ? a : b ;}
 
-Set::Set() : size_(0), cur_(nullptr), next_(nullptr)
-{ 
-	std::cout<<"Constructor\n";
-}
+Set::Set() : size_(0), cur_(nullptr), next_(nullptr){ }
 
 Set::Set(const Set &set) : size_(0), cur_(nullptr), next_(nullptr)
 {
@@ -17,22 +14,7 @@ Set::Set(const Set &set) : size_(0), cur_(nullptr), next_(nullptr)
 			add(ptr->data);
 			ptr = ptr->prev;
 		}
-	std::cout<<"Copy constructor\n";
 }
-
-/*
-Set::Set(Set &&set)
-{
-	size_ = set.size_;
-	for (List *ptr = set.cur_; ptr != nullptr;)
-	{
-		cur_ = ptr;
-		cur_ = cur_->prev;
-		ptr = ptr->prev;
-	}
-	std::cout << "Move constructor\n";
-}
-*/
 
 Set& Set::operator=(const Set &set)
 {
@@ -54,23 +36,6 @@ Set& Set::operator=(const Set &set)
 		ptr = ptr->prev;
 	}
 
-	/*
-	int a = min(size_, set.size());
-	size_ = set.size();
-	List* ptrThis = cur_; List *ptr = set.cur_;
-	for (int i = 1; i < a; ++i)
-	{
-		ptrThis->data = ptr->data;
-		ptrThis = ptrThis->prev;
-		ptr = ptr->prev;
-	}
-	if (set.size() > size_)
-		while (ptr != nullptr)
-		{
-			add(ptr->data);
-			ptr = ptr->prev;
-		}
-	*/
 	return *this;
 }
 
@@ -85,7 +50,7 @@ Set::~Set()
 
 void Set::add(int a)
 {
-	if (cur_ == nullptr) // есть ли значения слева?
+	if (cur_ == nullptr)
 	{
 		++size_;
 		cur_ = new List;
@@ -103,43 +68,6 @@ void Set::add(int a)
 	cur_->next = next_;
 	cur_ = next_;
 	return;
-	/*
-	if (cur_ == nullptr) // есть ли значения слева?
-	{
-		cur_ = new List;
-		cur_->data = a;
-		cur_->next = nullptr;
-		cur_->prev = nullptr;
-		return;
-	}
-	else for (List* ptr = cur_; ;)
-	{
-		if (ptr == nullptr) return;
-		else if(cur_->data < a) 
-		{
-			next_ = new List;
-			next_->data = a;
-			next_->next = nullptr;
-			next_->prev = cur_;
-			cur_->next = next_;
-			cur_ = next_;
-			return;
-		}
-		else if (cur_->data > a && cur_->prev->data < a)
-		{
-			next_ = new List;
-			next_->data = a;
-			next_->next = cur_;
-			next_->prev = cur_->prev;
-			cur_->prev->next = next_;
-			cur_->prev = next_;
-			cur_ = next_;
-			return;
-		}
-		else if (cur_->data > a && cur_->prev->data > a) ptr = ptr->prev;
-		else if (cur_->data == a) return;
-	}
-	*/
 }
 
 void Set::remove(int a)
@@ -148,11 +76,11 @@ void Set::remove(int a)
 	{
 		if (ptr->data == a)
 		{
-			if (ptr->next == nullptr) //значение стоит с края
+			if (ptr->next == nullptr)
 			{
 				ptr->prev->next = nullptr;
 			}
-			else if(ptr->prev == nullptr) // с другого края 
+			else if(ptr->prev == nullptr)
 			{
 				ptr->next->prev = nullptr;
 			}

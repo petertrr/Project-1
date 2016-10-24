@@ -15,7 +15,6 @@ class Set
 public:
 	Set();
 	Set(const Set &set);
-	//Set(Set &&set);
 	Set &operator=(const Set &set);
 	~Set();
 

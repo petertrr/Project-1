@@ -10,6 +10,7 @@ int main()
 {
 	Set set1;
 	Set set2;
+
 /*
 	while (set1.size() < 4)
 		set1.add(random(0, 5));
@@ -24,7 +25,6 @@ int main()
 	std::cin >> set1;
 	std::cout << "set2 = ";
 	std::cin >> set2;
-	
 
 	Set set = set1 + set2;
 	std::cout<<"s1 + s2 = "<<set<<std::endl;
