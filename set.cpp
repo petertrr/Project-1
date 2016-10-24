@@ -1,24 +1,18 @@
 #include<iostream>
+#include<string>
 
 #include"set.h"
 
 inline int min(int a, int b) {return a<b ? a : b ;}
 
-Set::Set()
+Set::Set() : size_(0), cur_(nullptr), next_(nullptr)
 { 
-	size_ = 0; 
-	cur_ = nullptr;
-	next_ = nullptr;
 	std::cout<<"Constructor\n";
 }
 
-Set::Set(const Set &set)
+Set::Set(const Set &set) : size_(0), cur_(nullptr), next_(nullptr)
 {
-	size_ = 0;
-	cur_ = nullptr;
-	next_ = nullptr;
-	List *ptr = set.cur_;
-	while (ptr != nullptr)
+	for (List *ptr = set.cur_; ptr != nullptr;)
 		{
 			add(ptr->data);
 			ptr = ptr->prev;
@@ -26,14 +20,27 @@ Set::Set(const Set &set)
 	std::cout<<"Copy constructor\n";
 }
 
+/*
+Set::Set(Set &&set)
+{
+	size_ = set.size_;
+	for (List *ptr = set.cur_; ptr != nullptr;)
+	{
+		cur_ = ptr;
+		cur_ = cur_->prev;
+		ptr = ptr->prev;
+	}
+	std::cout << "Move constructor\n";
+}
+*/
+
 Set& Set::operator=(const Set &set)
 {
 	if(this == &set) return *this;
 
 	for (List* ptr = cur_; ;)
 	{
-		if (ptr != nullptr) delete ptr->next;
-		ptr = ptr->prev;
+		if (ptr != nullptr) { delete ptr->next; ptr = ptr->prev; }
 		if (ptr == nullptr) { delete ptr; break; }
 	}
 
@@ -71,9 +78,8 @@ Set::~Set()
 {
 	for (List* ptr = cur_; ;)
 	{
-		if (ptr != nullptr) delete ptr->next;
-		ptr = ptr->prev;
-		if (ptr == nullptr) { delete ptr; break; }
+		if (ptr != nullptr) { delete ptr->next; ptr = ptr->prev; }
+		else if (ptr == nullptr) { delete ptr; break; }
 	}
 }
 
@@ -220,4 +226,30 @@ std::ostream& operator<<(std::ostream& os, const Set& set)
 		else os<<" }";
 	}
 	return os;
+}
+
+std::istream& operator >> (std::istream& is, Set& set)
+{
+	Set buf;
+	
+	std::string str;
+	while (1)
+	{
+		is >> str;
+		for (int i = 0; i < str.length(); ++i)
+			if (str[i] == '{' || str[i] == ',' || str[i] == ' ') continue;
+			else if (str[i] == '}') break;
+			else
+			{
+				int a = str[i] - '0';
+				if (i != str.length() - 1)
+					while (str[++i] != ',' && str[i] != '}')
+						a = a * 10 + str[i] - '0';
+				buf.add(a);
+			}
+			if (str[str.length() - 1] == '}')break;
+	}
+	set = buf;
+
+	return is;
 }

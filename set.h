@@ -32,6 +32,7 @@ public:
 	Set operator-(Set &set) { return subtract((*this), set); };
 
 	friend std::ostream& operator<<(std::ostream& os, const Set& set);
+	friend std::istream& operator>>(std::istream& is, Set& set);
 
 	const int size() const { return size_; }
 
