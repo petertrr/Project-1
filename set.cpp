@@ -12,65 +12,27 @@ Set::Set() : size_(0), cur_(nullptr), next_(nullptr)
 
 Set::Set(const Set &set) : size_(0), cur_(nullptr), next_(nullptr)
 {
-	for (List *ptr = set.cur_; ptr != nullptr;)
-		{
-			add(ptr->data);
-			ptr = ptr->prev;
-		}
-	std::cout<<"Copy constructor\n";
-}
-
-/*
-Set::Set(Set &&set)
-{
-	size_ = set.size_;
-	for (List *ptr = set.cur_; ptr != nullptr;)
-	{
-		cur_ = ptr;
-		cur_ = cur_->prev;
-		ptr = ptr->prev;
-	}
-	std::cout << "Move constructor\n";
-}
-*/
-
-Set& Set::operator=(const Set &set)
-{
-	if(this == &set) return *this;
-
-	for (List* ptr = cur_; ;)
-	{
-		if (ptr != nullptr) { delete ptr->next; ptr = ptr->prev; }
-		if (ptr == nullptr) { delete ptr; break; }
-	}
-
-	size_ = 0;
-	cur_ = nullptr;
-	next_ = nullptr;
-
-	for (List* ptr = set.cur_; ptr != nullptr;)
+	for (List *ptr = set.cur_;ptr != nullptr;)
 	{
 		add(ptr->data);
 		ptr = ptr->prev;
 	}
+	std::cout<<"Copy constructor\n";
+}
 
-	/*
-	int a = min(size_, set.size());
-	size_ = set.size();
-	List* ptrThis = cur_; List *ptr = set.cur_;
-	for (int i = 1; i < a; ++i)
-	{
-		ptrThis->data = ptr->data;
-		ptrThis = ptrThis->prev;
-		ptr = ptr->prev;
+Set::Set(Set &&set) : Set()
+{
+	swap(*this, set);
+	std::cout << "Move constructor\n";
+}
+
+Set& Set::operator=(const Set &set)
+{
+	if (this != &set) {
+		Set buf(set);
+		swap(*this, buf);
 	}
-	if (set.size() > size_)
-		while (ptr != nullptr)
-		{
-			add(ptr->data);
-			ptr = ptr->prev;
-		}
-	*/
+	std::cout << "Assignment\n";
 	return *this;
 }
 
@@ -81,6 +43,13 @@ Set::~Set()
 		if (ptr != nullptr) { delete ptr->next; ptr = ptr->prev; }
 		else if (ptr == nullptr) { delete ptr; break; }
 	}
+}
+
+void Set::swap(Set& set1, Set& set2)
+{
+	std::swap(set1.size_, set2.size_);
+	std::swap(set1.cur_, set2.cur_);
+	std::swap(set1.next_, set2.next_);
 }
 
 void Set::add(int a)
